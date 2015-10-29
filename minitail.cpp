@@ -40,37 +40,73 @@
 #include <future>
 #include <thread>
 
-void minitail(std::string path, std::function<void (std::string)> delegate) {
-    std::future<void> worker = std::async(std::launch::async, [path, delegate]() {
-        //  Adapted from http://stackoverflow.com/questions/11757304/how-to-read-a-growing-text-file-in-c
+void mt(std::string path, std::function<void (std::string)> delegate, bool *stop);
+void mt_async(std::string path, std::function<void (std::string)> delegate, bool *stop);
+
+minitail::minitail(std::string path, std::function<void (std::string)> delegate) {
+    _path = path;
+    _delegate = delegate;
+    
+    _running = false;
+    
+    _stopController = new bool;
+}
+
+void minitail::start() {
+    if (_running)
+        return;
+    
+    _running = true;
+    
+    *_stopController = false;
+    
+    mt_async(_path, _delegate, _stopController);
+}
+
+void minitail::stop() {
+    if (!_running)
+        return;
+    
+    _running = false;
+    
+    *_stopController = true;
+}
+
+void mt(std::string path, std::function<void (std::string)> delegate, bool *stop) {
+    //  Adapted from http://stackoverflow.com/questions/11757304/how-to-read-a-growing-text-file-in-c
+    
+    std::ifstream ifs(path, std::ios::ate);
+    
+    if (!ifs.is_open()) {
+        std::cerr << "ERROR opening file: " << path << '\n';
         
-        std::ifstream ifs(path, std::ios::ate);
-        
-        if(!ifs.is_open()) {
-            std::cerr << "ERROR opening file: " << path << '\n';
+        return;
+    }
+    
+    std::ios::streampos gpos = ifs.tellg();
+    
+    std::string line;
+    
+    while (!(* stop)) {
+        if (!std::getline(ifs, line) || ifs.eof()) {
+            ifs.clear();
+            ifs.seekg(gpos);
             
-            return;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            
+            continue;
         }
         
-        std::ios::streampos gpos = ifs.tellg();
+        gpos = ifs.tellg();
         
-        std::string line;
-        
-        bool done = false;
-        
-        while (!done) {
-            if (!std::getline(ifs, line) || ifs.eof()) {
-                ifs.clear();
-                ifs.seekg(gpos);
-                
-                std::this_thread::sleep_for(std::chrono::milliseconds(100));
-                
-                continue;
-            }
-            
-            gpos = ifs.tellg();
-            
-            delegate(line);
-        }
-    });
+        delegate(line);
+    }
+    
+    std::cout << "Bye-bye!" << std::endl;
+}
+
+void mt_async(std::string path, std::function<void (std::string)> delegate, bool *stop) {
+    std::thread t(mt, path, delegate, stop);
+    
+    t.detach();
 }

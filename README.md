@@ -1,12 +1,16 @@
 minitail
 ===
 
-"tail"-like library for C++.
+`tail`-like library for C++.
 
 Usage
 ---
 
-The minitail function takes a path (to a file to watch) and a delegate function, that receives each line and may parse it as desired.
+The `minitail` class is initialized with a file to watch and a delegate function which will be called every time a new line is read with its contents as the parameter.
+
+Use start() and stop() to control the object.
+
+The object runs **asynchronously**.
 
 License
 ---

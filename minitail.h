@@ -40,6 +40,23 @@
 #include <iostream>
 #include <functional>
 
-void minitail(std::string path, std::function<void (std::string)> delegate);
+#include <future>
+
+class minitail {
+    
+    std::string _path;
+    std::function<void (std::string)> _delegate;
+    
+    bool _running;
+    bool *_stopController;
+    
+public:
+    
+    minitail(std::string path, std::function<void (std::string)> delegate);
+    
+    void start();
+    void stop();
+    
+};
 
 #endif /* minitail_hpp */

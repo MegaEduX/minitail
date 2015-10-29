@@ -41,10 +41,15 @@ void test(std::string line) {
 }
 
 int main(int argc, const char * argv[]) {
-    minitail(argv[1], test);
+    minitail mt = minitail(argv[1], test);
     
-    while (true) {
-        //  Just keep the main thread running.
+    mt.start();
+    
+    for (int i = 0; i < 20; i++) {
+        std::cout << "Sleeping... (" << i << ")" << std::endl;
+        
+        if (i == 10)
+            mt.stop();
         
         sleep(1);
     }
