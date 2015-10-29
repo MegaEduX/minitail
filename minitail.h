@@ -34,8 +34,8 @@
 //  POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef minitail_hpp
-#define minitail_hpp
+#ifndef minitail_h
+#define minitail_h
 
 #include <iostream>
 #include <functional>
@@ -59,4 +59,4 @@ public:
     
 };
 
-#endif /* minitail_hpp */
+#endif /* minitail_h */
